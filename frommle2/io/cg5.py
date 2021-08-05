@@ -45,7 +45,7 @@ class DataConverter:
         entry["grav"]=float(spl[3])
         entry["sd"]=float(spl[4])
         entry["tiltx"]=float(spl[5])
-        entry["tilty"]=float(spl[5])
+        entry["tilty"]=float(spl[6])
         entry["temp"]=float(spl[7])
         entry["cgtide"]=float(spl[8])
         entry["dur"]=int(spl[9])
