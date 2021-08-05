@@ -88,5 +88,6 @@ class UserConfig:
         port=self.settings[alias]["port"]
         dbname=self.settings[alias]["dbname"]
         secret=self.getAuth(alias,"Please enter password for user %s at database %s on host %s"%(user,dbname,host))
+            
         return  "postgresql+psycopg2://"+user+":"+secret+"@"+host+":"+str(port)+"/"+dbname
 

@@ -18,6 +18,9 @@
 
 from pyshtools.expand import SHExpandDH
 import numpy as np
+import xarray as xr
+
+import frommle2.sh.xarraysh
 
 def rastio2shDH(rio,nmax=100):
     """Converts an equidistant (sub) grid to spherical harmonic 4-pi normalized coefficients, using the Driscoll Healy approach using shtools"""
@@ -59,15 +62,6 @@ def rastio2shDH(rio,nmax=100):
 
     clm=SHExpandDH(globrast,sampling=2,lmax_calc=nmax)
 
-    return clm
-
-    # #convert to xarray
-    # shg=makeGArray(SHGuide(nmax))
-
-
-    # for i,nmt in enumerate(shg.gp[0]):
-        # n,m,t=nmt
-        # shg.mat[i]=clm[int(t),n,m]
-
-    # return shg
+    return xr.DataArray.sh.from_cnm(clm)
+    
 
