@@ -20,7 +20,7 @@ import pandas as pd
 import geopandas as gpd
 from dateutil import parser
 from shapely.geometry import Point
-from datetime import timedelta,datetime
+from datetime import timedelta,datetime,timezone
 from copy import copy
 class DataConverter:
     """Helper class which parses a data line and returns a dictionary
@@ -28,8 +28,11 @@ class DataConverter:
     /-------LAT--------LONG-----ALT.------GRAV.---SD.--TILTX--TILTY-TEMP---TIDE---DUR-REJ-----TIME----DEC.TIME+DATE--TERRAIN---DATE"""
     
     regexData=re.compile('^[0-9]')
-    dtold=datetime.min
     sesid=-1
+    def __init__(self,tzinfo=timezone.utc):
+        """POssibly supply a different time zone for input data"""
+        self.tzinfo=tzinfo
+        self.dtold=datetime.min
     def __call__(self,ln):
         if not self.regexData.search(ln):
             return None
@@ -95,5 +98,7 @@ def readCG5Ascii(filename):
                 tmpentry=mconv(ln)
                 if tmpentry:
                     mentry.update(tmpentry)
-    
-    return pd.DataFrame(data=metaentries),gpd.GeoDataFrame(data=entries,geometry="geom")
+    #note we don't use the last measurement as it is usually perturbed
+    mdf=pd.DataFrame(data=metaentries[0:-2])
+    df=gpd.GeoDataFrame(data=entries[0:-2],geometry="geom")
+    return mdf,df.set_index('time')
