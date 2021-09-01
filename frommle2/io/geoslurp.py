@@ -41,7 +41,11 @@ def gdal2rastio(entry):
 def readDataFrame(eng,qry,index_col=None):
     """Reads a dataframe from a database engine and convert to GeoDataFrame when a geometry column is present"""
     #try reading as spatially aware database (postgis, spatialite)
-    df=gpd.read_postgis(qry,eng,index_col=index_col)
+    try:
+        df=gpd.read_postgis(qry,eng,index_col=index_col)
+    except ValueError:
+        #possible failure when this is not a table which has a geometry column, so try again with reading a non-postgis sql query
+        df=pd.read_sql_query(qry,eng,index_col=index_col)
 
     return df
 
