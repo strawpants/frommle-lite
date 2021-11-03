@@ -28,11 +28,11 @@ class DataConverter:
     /-------LAT--------LONG-----ALT.------GRAV.---SD.--TILTX--TILTY-TEMP---TIDE---DUR-REJ-----TIME----DEC.TIME+DATE--TERRAIN---DATE"""
     
     regexData=re.compile('^[0-9]')
-    sesid=-1
-    def __init__(self,tzinfo=timezone.utc):
+    def __init__(self,tzinfo=timezone.utc,lastSesId=-1):
         """POssibly supply a different time zone for input data"""
         self.tzinfo=tzinfo
         self.dtold=datetime.min
+        self.sesid=lastSesId
     def __call__(self,ln):
         if not self.regexData.search(ln):
             return None
@@ -76,10 +76,10 @@ class MetaConverter:
         name,value=ln.replace(":","|",1).replace("/","").replace("\t"," ").replace("\n","").split("|")
         return {name.lstrip():value.lstrip()}
 
-def readCG5Ascii(filename):
+def readCG5Ascii(filename,lastSesId=-1):
     """"Function which takes a CG-5 ascii dump and puts the data and metadata in geopandas dataframe and the dataframe respectively"""
     
-    dconv=DataConverter()
+    dconv=DataConverter(lastSesId=lastSesId)
     mconv=MetaConverter()
     with open(filename,'rt') as fid:
         entries=[]
@@ -98,7 +98,7 @@ def readCG5Ascii(filename):
                 tmpentry=mconv(ln)
                 if tmpentry:
                     mentry.update(tmpentry)
+    mdf=pd.DataFrame(data=metaentries)
     #note we don't use the last measurement as it is usually perturbed
-    mdf=pd.DataFrame(data=metaentries[0:-2])
     df=gpd.GeoDataFrame(data=entries[0:-2],geometry="geom")
-    return mdf,df.set_index('time')
+    return mdf.set_index('sessionid'),df.set_index('time')
