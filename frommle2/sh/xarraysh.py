@@ -111,7 +111,7 @@ class SHAccessor:
         """Serialize n,m,t multindex so it can be written to a file"""
         return SHAccessor._flatten_shg_obj(self._obj)
    
-    def build_multindex(self):
+    def build_MultiIndex(self):
         return SHAccessor._build_multindex_obj(self._obj)
 
     @staticmethod
@@ -121,8 +121,16 @@ class SHAccessor:
     
     @staticmethod
     def _build_multindex_obj(obj):
-        shgmi=pd.MultiIndex.from_tuples([(n,m,trig(t)) for n,m,t in zip(obj.n.values,obj.m.values,obj.t.values)],names=["n","m","t"])
-        return obj.drop(["n","m","t"]).assign_coords(shg=shgmi)
+
+        #either build from separate coordinate variables (n,m,t)
+        if "n" in obj.coords and "m" in obj.coords and "t" in obj.coords:
+            shgmi=pd.MultiIndex.from_tuples([(n,m,trig(t)) for n,m,t in zip(obj.n.values,obj.m.values,obj.t.values)],names=["n","m","t"])
+            return obj.drop_vars(["n","m","t"]).assign_coords(shg=shgmi)
+        elif "shg" in obj.coords:
+            #rebuild multiindex from an array of "left-over" tuples
+            shgmi=pd.MultiIndex.from_tuples(obj.shg.values,names=["n","m","t"])
+            return obj.drop_vars(["shg"]).assign_coords(shg=shgmi)
+
 
 @xr.register_dataset_accessor("sh")
 class SHDSAccessor:
@@ -170,6 +178,6 @@ class SHDSAccessor:
         """Serialize n,m,t multindex so it can be written to a file"""
         return SHAccessor._flatten_shg_obj(self._obj)
    
-    def build_multindex(self):
+    def build_MultiIndex(self):
         return SHAccessor._build_multindex_obj(self._obj)
 
