@@ -15,14 +15,29 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 # Author Roelof Rietbroek (roelof@geod.uni-bonn.de), 2020
-import setuptools
-from setuptools import find_packages
+from setuptools import setup,find_packages,Extension
+from Cython.Build import cythonize
+import os 
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+#don't necessarily use cython
+if "USE_CYTHON" in os.environ:
+    useCython=True
+    ext=".pyx"
+else:
+    useCython=False
+    ext=".cpp"
 
-setuptools.setup(
+extensions=[Extension("frommle2.sh.legendre",["frommle2-cython/sh/legendre"+ext])]
+
+
+if useCython:
+    #additionally cythonize pyx files before building
+    extensions=cythonize(extensions)
+
+setup(
     name="frommle2",
     author="Roelof Rietbroek",
     author_email="roelof@wobbly.earth",
@@ -34,9 +49,8 @@ setuptools.setup(
     packages=find_packages("."),
     package_dir={"":"."},
     # scripts=['clitools/geoslurper.py'],
-    install_requires=['numpy','pyshtools'],
-    # ,'pycurl','cryptography','PyYAML','lxml','keyring','pandas','motuclient','netCDF4','GDAL','Shapely','GeoAlchemy2','psycopg2'],
-    # extra_requires=["pyshtools"],
+    install_requires=['numpy','pyshtools','cython'],
+    ext_modules=extensions,
     classifiers=["Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Operating System :: POSIX :: Linux",

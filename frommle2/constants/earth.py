@@ -13,18 +13,13 @@
 # License along with Frommle; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-# Author Roelof Rietbroek (r.rietbroek@utwente.nl), 2021
+# Author Roelof Rietbroek (r.rietbroek@utwente.nl), 2022
 
-import xarray as xr
+a_earth=0.6378136460e+07 #mean radius in meter
+rho_sea=1.025e3 #average density of sea water kg/m^3
+rho_water=1.e3 # average density of water
+rho_earth=5517.0 #average density of the Earth
+rho_ice=931.0 #density of ice kg/m^3 taken from G. Spada and friends
+g=9.80665e0 # mean gravity m/s^2
 
-class BaseFwd:
-    """Base class for a forward operator which uses xarray/pandas style indices/coordinates to refer to the input/output"""
-    
-    def __init__(self,incoord,outcoord):
-        #create an empty dataset with the column coordinates in place
-        self.ds=xr.Dataset(coords={"in":incoord,"out":outcoord})
-        pass 
-    def __call__(self,dsin):
-        """Takes an xarray dataset and compute the forward propagated values"""
-        raise NotImplementedError("__call__ should be implemented")
-        pass
+

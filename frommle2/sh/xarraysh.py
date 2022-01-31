@@ -29,11 +29,6 @@ from functools import total_ordering
 class trig(IntEnum):
     c=0
     s=1
-    # def __lt__(self,other):
-        # return self.value < other.value
-
-    # def __int__(self):
-        # return self.value
 
 
 @xr.register_dataarray_accessor("sh")
@@ -72,13 +67,38 @@ class SHAccessor:
         return sz
 
     @staticmethod
-    def zeros(nmax,nmin=0,squeeze=False,name="cnm"):
+    def zeros(nmax,nmin=0,squeeze=False,name="cnm",auxcoords={}):
+        """0-Initialize an spherical harmonic DataArray based on nmax and nmin"""
+        return SHAccessor._initWithScalar(nmax,nmin,0,squeeze,name,auxcoords)
+    
+    @staticmethod
+    def ones(nmax,nmin=0,squeeze=False,name="cnm",auxcoords={}):
+        """1-Initialize an spherical harmonic DataArray based on nmax and nmin"""
+        return SHAccessor._initWithScalar(nmax,nmin,1,squeeze,name,auxcoords)
+
+    @staticmethod
+    def _initWithScalar(nmax,nmin=0,scalar=0,squeeze=False,name="cnm",auxcoords={}):
         """Initialize an spherical harmonic DataArray based on nmax and nmin"""
         sz=SHAccessor.nsh(nmax,nmin,squeeze)
         coords={"shg":SHAccessor.nmt_mi(nmax,nmin,squeeze=squeeze)}
-        return xr.DataArray(data=np.zeros([sz]),dims=["shg"],name=name,coords=coords)
+        dims=["shg"]
+        shp=[sz]
+
+        #possibly append coordinates
+        for dim,coord in auxcoords.items():
+            dims.append(dim)
+            shp.append(len(coord))
+            coords[dim]=coord
 
 
+        if scalar == 0:
+            return xr.DataArray(data=np.zeros(shp),dims=dims,name=name,coords=coords)
+        elif scalar == 1:
+            return xr.DataArray(data=np.ones(shp),dims=dims,name=name,coords=coords)
+        else:
+            return xr.DataArray(data=np.full(shp,scalar),dims=dims,name=name,coords=coords)
+
+    
     @staticmethod
     def from_cnm(cnm):
         """Create a xarray from a cnm array from shtools"""
@@ -102,7 +122,12 @@ class SHAccessor:
         else:
             nmt=[(n,m,t) for t in [trig.c,trig.s] for n in range(nmin,nmax+1) for m in range(n+1)]
         return SHAccessor.mi_fromtuples(nmt)
-    
+
+    def shg(nmax,nmin,squeeze=False,dim="shg"):
+        """Convenience function which returns a dictionary which can be used as input for xarray constructors"""
+        return {dim:(dim,SHAcessor.nmt_mi(nmax,nmin,squeeze))}
+
+
     @staticmethod
     def mi_fromtuples(nmt):
         return pd.MultiIndex.from_tuples(nmt,names=["n","m","t"])
@@ -141,7 +166,7 @@ class SHDSAccessor:
 
     
     def extend(self,nmax=None,nmin=None,fillvalue=0):
-        """Truncate minimum and /or maximum degree"""
+        """Extend minimum and /or maximum degree"""
         
         pass
 

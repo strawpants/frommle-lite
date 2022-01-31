@@ -16,63 +16,44 @@
 # Author Roelof Rietbroek (r.rietbroek@utwente.nl), 2021
 
 from frommle2.io.binv_legacy import readBINV
+from frommle2.core import LinearSparseFwd
 import xarray as xr
 from copy import copy
 from frommle2.core.logger import logger
-from dask.array.core import einsum_lookup
 import sparse
 
-class SHfilter:
+class SHfilter(LinearSparseFwd):
     def __init__(self,ffile,transpose=False):
         ddkdict=readBINV(ffile,unpack=True)
         #create a multindex from the side description
         nmt=[(int(tag[4:7]),int(tag[7:11]),int(tag[1:2] == 'S')) for tag in ddkdict['side1_d']]
         shmi=xr.DataArray.sh.mi_fromtuples(nmt)
+        dim="shg"
         if transpose:
             # create an xarray object with a  multindex for the spherical hamronics
-            self.dsfilt=xr.DataArray(ddkdict['mat'],coords={"shg":("shg",shmi)},dims=["shg","shg_t"],name="ddk")
+            dasparse=xr.DataArray(ddkdict['mat'],coords={"shg":("shg",shmi)},dims=["shg","shg_t"],name="ddk")
         else:
             # create an xarray object with a  multindex for the spherical hamronics
-            self.dsfilt=xr.DataArray(ddkdict['mat'],coords={"shg":("shg",shmi)},dims=["shg_t","shg"],name="ddk")
+            dasparse=xr.DataArray(ddkdict['mat'],coords={"shg":("shg",shmi)},dims=["shg_t","shg"],name="ddk")
         
-        #do explicit chunking (set this matrix as a one chunk dask array)
-        n=self.dsfilt.sizes["shg"]
-        self.dsfilt=self.dsfilt.chunk((n,n))
-
-        #also register the einsum functions which are needed to do the sparse dot functions
-        einsum_lookup.register(sparse.COO,SHfilter.einsumReplace)
+        super().__init__(dasparse,dim)
 
     def __call__(self,shxar):
-        
-        nmin=shxar.sh.nmin
-        nmax=shxar.sh.nmax
+            
+            nmin=shxar.sh.nmin
+            nmax=shxar.sh.nmax
 
-        nminf=self.dsfilt.sh.nmin
-        nmaxf=self.dsfilt.sh.nmax
+            nminf=self.dasparse.sh.nmin
+            nmaxf=self.dasparse.sh.nmax
 
+            #compute the dot product 
+            dsfiltered=super().__call__(shxar) 
 
-        #compute the dot product 
-        dsfiltered=self.dsfilt.dot(shxar,dims="shg") 
-        
-        
-
-        #fix the multindex coordinate
-        dsfiltered=dsfiltered.rename({"shg_t":"shg"}).assign_coords(shg=("shg",self.dsfilt.get_index('shg')))
-        #add back in non-filtered elements and take out coefficients with degrees higher than nmax input
-        if nmin < nminf:
-            logger.info(f"Restoring original coefficients below {nminf}")
-            dsfiltered=xr.concat([shxar.where(shxar.shg.n < nminf,drop=True),dsfiltered],dim="shg")
-        return dsfiltered.where(dsfiltered.shg.n <= nmax,drop=True)
-
-
-    @staticmethod
-    def einsumReplace(subscripts, *operands, out=None, dtype=None, order='K', casting='safe', optimize=False):
-        """Mimics the interface of https://numpy.org/doc/stable/reference/generated/numpy.einsum.html, but uses the sparse.COO dot function"""
-        
-        if subscripts == "ab,cb->ac":
-            return operands[0].dot(operands[1].T)
-        elif subscripts == "ab,ca->bc":
-            return operands[0].T.dot(operands[1].T)
-        else:
-            raise NotImplementedError(f"Don't know (yet) how to handle this einsum: {subscripts} with sparse.dot operations")
+            #fix the multindex coordinate so that the original SHG index is linked to the output coordinates (they are the same after the dot product)
+            dsfiltered=dsfiltered.rename({"shg_t":"shg"}).assign_coords(shg=("shg",self.dasparse.get_index('shg')))
+            #add back in non-filtered elements and take out coefficients with degrees higher than nmax input
+            if nmin < nminf:
+                logger.info(f"Restoring original coefficients below {nminf}")
+                dsfiltered=xr.concat([shxar.where(shxar.shg.n < nminf,drop=True),dsfiltered],dim="shg")
+            return dsfiltered.where(dsfiltered.shg.n <= nmax,drop=True)
 
