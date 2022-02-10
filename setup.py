@@ -18,6 +18,7 @@
 from setuptools import setup,find_packages,Extension
 from Cython.Build import cythonize
 import os 
+import numpy as np
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -30,7 +31,7 @@ else:
     useCython=False
     ext=".cpp"
 
-extensions=[Extension("frommle2.sh.legendre",["frommle2-cython/sh/legendre"+ext])]
+extensions=[Extension("frommle2.sh.legendre",["frommle2-cython/sh/legendre"+ext],include_dirs=[np.get_include()])]
 
 
 if useCython:
