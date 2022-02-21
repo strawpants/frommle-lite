@@ -22,15 +22,28 @@ import xarray as xr
 import numpy as np
 
 
-@xr.register_dataset_accessor("neqs")
-class NEQSAccessor:
+@xr.register_dataset_accessor("neq")
+class NEQAccessor:
     def __init__(self, xarray_obj):
         self._obj = xarray_obj
 
     
-    def extend(self):
-        """Truncate minimum and /or maximum degree"""
-        self.test="blah" 
+    def reduce(self,variables=None):
+        """Reduce (implicitly solve) certain variables in the normal equation system"""
+        return self._obj
+
+
+    def fix(self,variables=None):
+        """Fix the indicated variables to its a apriori values"""
+        return self._obj
+
+    def set_apriori(self,da):
+        """Change the a priori values of the system"""
+        return self._obj
+
+
+    def add(self,other):
+        """Add one normal equation system to another. Common parameters will be added, the system will be extended with unique parameters of the other system"""
         return self._obj
 
 
