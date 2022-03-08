@@ -17,6 +17,7 @@
 # Author Roelof Rietbroek (roelof@geod.uni-bonn.de), 2020
 from setuptools import setup,find_packages,Extension
 from Cython.Build import cythonize
+import Cython.Compiler.Options
 import os 
 import numpy as np
 
@@ -27,16 +28,26 @@ with open("README.md", "r") as fh:
 if "USE_CYTHON" in os.environ:
     useCython=True
     ext=".pyx"
+    Cython.Compiler.Options.annotate = True
 else:
     useCython=False
     ext=".cpp"
 
-extensions=[Extension("frommle2.sh.legendre",["frommle2-cython/sh/legendre"+ext],include_dirs=[np.get_include()])]
+
+def listexts():
+    names=["sh/legendre","sh/ynm","sh/analysis"]
+    exts=[]
+    for nm in names:
+        exts.append(Extension("frommle2."+nm.replace("/","."),["frommle2/"+nm+ext],include_dirs=[np.get_include()]))
+    return exts
+
+extensions=listexts()
+# [Extension("frommle2.sh.legendre",["frommle2-cython/sh/legendre"+ext],include_dirs=[np.get_include()])]
 
 
 if useCython:
     #additionally cythonize pyx files before building
-    extensions=cythonize(extensions)
+    extensions=cythonize(extensions,language_level=3,annotate=True)
 
 setup(
     name="frommle2",

@@ -123,6 +123,7 @@ class SHAccessor:
             nmt=[(n,m,t) for t in [trig.c,trig.s] for n in range(nmin,nmax+1) for m in range(n+1)]
         return SHAccessor.mi_fromtuples(nmt)
 
+    @staticmethod
     def shg(nmax,nmin,squeeze=False,dim="shg"):
         """Convenience function which returns a dictionary which can be used as input for xarray constructors"""
         return {dim:(dim,SHAcessor.nmt_mi(nmax,nmin,squeeze))}
@@ -131,6 +132,10 @@ class SHAccessor:
     @staticmethod
     def mi_fromtuples(nmt):
         return pd.MultiIndex.from_tuples(nmt,names=["n","m","t"])
+    
+    @staticmethod
+    def mi_fromarrays(nmt):
+        return pd.MultiIndex.from_arrays(nmt,names=["n","m","t"])
     
     def flatten_shg(self):
         """Serialize n,m,t multindex so it can be written to a file"""

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>frommle2.io.binv_legacy &mdash; frommle2 alpha1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> frommle2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">Reference Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">frommle2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>frommle2.io.binv_legacy</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for frommle2.io.binv_legacy</h1><div class="highlight"><pre>
+<span></span><span class="c1"># This file is part of Frommle2</span>
+<span class="c1"># Frommle is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 3 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># Frommle is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with Frommle; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA</span>
+
+<span class="c1"># Author Roelof Rietbroek (r.rietbroek@utwente.nl), 2021</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sparse</span>
+
+<div class="viewcode-block" id="getBDcoords"><a class="viewcode-back" href="../../../reference/frommle2.io.html#frommle2.io.binv_legacy.getBDcoords">[docs]</a><span class="k">def</span> <span class="nf">getBDcoords</span><span class="p">(</span><span class="n">ddict</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ddict</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;BDFULLV0&quot;</span><span class="p">,</span><span class="s2">&quot;BDFULLVN&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;cannot get coordinates for this type of matrix (yet)&quot;</span><span class="p">)</span>
+
+    <span class="n">mxblk</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ddict</span><span class="p">[</span><span class="s1">&#39;blockind&#39;</span><span class="p">]))</span>
+    <span class="n">mshx</span><span class="p">,</span><span class="n">mshy</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mxblk</span><span class="p">)],[</span><span class="n">y</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mxblk</span><span class="p">)])</span>
+    <span class="c1"># mshx=mshx.reshape([mshx.size])</span>
+    <span class="c1"># mshy=mshy.reshape([mshy.size])</span>
+
+    <span class="c1">#initialize coords array</span>
+    <span class="n">coords</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="n">ddict</span><span class="p">[</span><span class="s1">&#39;pval1&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">ddict</span><span class="p">[</span><span class="s1">&#39;pval2&#39;</span><span class="p">]],</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+    <span class="n">blkstrt</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">nshift</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">for</span> <span class="n">blkend</span> <span class="ow">in</span> <span class="n">ddict</span><span class="p">[</span><span class="s1">&#39;blockind&#39;</span><span class="p">]:</span>
+        <span class="n">blklen</span><span class="o">=</span><span class="p">(</span><span class="n">blkend</span><span class="o">-</span><span class="n">blkstrt</span><span class="p">)</span>
+        <span class="n">sz</span><span class="o">=</span><span class="n">blklen</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">nshift</span><span class="p">:</span><span class="n">nshift</span><span class="o">+</span><span class="n">sz</span><span class="p">]</span><span class="o">=</span><span class="n">mshx</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">blklen</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="n">blklen</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">sz</span><span class="p">])</span><span class="o">+</span><span class="n">blkstrt</span>
+        <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">nshift</span><span class="p">:</span><span class="n">nshift</span><span class="o">+</span><span class="n">sz</span><span class="p">]</span><span class="o">=</span><span class="n">mshy</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">blklen</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="n">blklen</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">sz</span><span class="p">])</span><span class="o">+</span><span class="n">blkstrt</span>
+        <span class="c1"># import pdb;pdb.set_trace()</span>
+        <span class="c1">#update blockstart</span>
+        <span class="n">blkstrt</span><span class="o">=</span><span class="n">blkend</span>
+        <span class="n">nshift</span><span class="o">+=</span><span class="n">sz</span>
+    <span class="k">return</span> <span class="n">coords</span></div>
+
+
+<div class="viewcode-block" id="readBINV"><a class="viewcode-back" href="../../../reference/frommle2.io.html#frommle2.io.binv_legacy.readBINV">[docs]</a><span class="k">def</span> <span class="nf">readBINV</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reads in a binary file written using the fortran RLFTlbx.</span>
+<span class="sd">    Pretty slow currenlty so a cpp version is foreseen&quot;&quot;&quot;</span>
+    <span class="n">dictout</span><span class="o">=</span><span class="p">{}</span>
+    <span class="c1">#default to assuming the file is in little endian</span>
+    <span class="n">endianness</span><span class="o">=</span><span class="s1">&#39;&lt;&#39;</span>
+    <span class="c1">#open filename in binary mode</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+        <span class="c1">#read the endianess checker</span>
+        <span class="p">(</span><span class="n">endian</span><span class="p">,)</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">endianness</span><span class="o">+</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="c1">#compare the magic number (should be 18754 on a system with the same endiannes of the file)</span>
+        <span class="k">if</span> <span class="n">endian</span> <span class="o">!=</span> <span class="mi">18754</span><span class="p">:</span>
+            <span class="c1">#switch to big endian</span>
+            <span class="n">endianness</span><span class="o">=</span><span class="s1">&#39;&gt;&#39;</span>
+
+        <span class="n">dictout</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;BI&#39;</span><span class="o">+</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="n">vnum</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">dictout</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
+
+        <span class="c1">#read type, description etc</span>
+
+        <span class="n">dictout</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="n">dictout</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">80</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+        <span class="c1">#read integer meta information</span>
+        <span class="p">(</span><span class="n">nints</span><span class="p">,</span><span class="n">ndbls</span><span class="p">,</span><span class="n">nval1</span><span class="p">,</span><span class="n">nval2</span><span class="p">)</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">endianness</span><span class="o">+</span><span class="s1">&#39;IIII&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="mi">4</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">vnum</span> <span class="o">&lt;</span> <span class="mf">2.4</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">pval1</span><span class="p">,</span><span class="n">pval2</span><span class="p">)</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">endianness</span><span class="o">+</span><span class="s1">&#39;II&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">pval1</span><span class="p">,</span><span class="n">pval2</span><span class="p">)</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">endianness</span><span class="o">+</span><span class="s1">&#39;LL&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">8</span><span class="o">*</span><span class="mi">2</span><span class="p">))</span>
+
+
+        <span class="k">if</span> <span class="n">vnum</span> <span class="o">&lt;=</span> <span class="mf">2.1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SYMV0___&#39;</span><span class="p">,</span><span class="s1">&#39;BDFULLV0&#39;</span><span class="p">,</span><span class="s1">&#39;BDSYMV0&#39;</span><span class="p">,</span><span class="s1">&#39;BDFULLVN&#39;</span><span class="p">]:</span>
+                <span class="n">nvec</span><span class="o">=</span><span class="mi">0</span>
+                <span class="n">pval2</span><span class="o">=</span><span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;SYMV1___&quot;</span><span class="p">:</span>
+                <span class="n">nvec</span><span class="o">=</span><span class="mi">1</span>
+                <span class="n">pval2</span><span class="o">=</span><span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;SYMV2___&quot;</span><span class="p">:</span>
+                <span class="n">nvec</span><span class="o">=</span><span class="mi">2</span>
+                <span class="n">pval2</span><span class="o">=</span><span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;FULLSQV0&quot;</span><span class="p">:</span>
+                <span class="n">nvec</span><span class="o">=</span><span class="mi">0</span>
+                <span class="n">pval2</span><span class="o">=</span><span class="n">pval1</span>
+
+            <span class="n">nread</span><span class="o">=</span><span class="mi">0</span>
+            <span class="n">nval2</span><span class="o">=</span><span class="n">nval1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">nvec</span><span class="p">,</span><span class="n">nread</span><span class="p">)</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">endianness</span><span class="o">+</span><span class="s2">&quot;II&quot;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;nval1&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">nval1</span>
+        <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;nval2&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">nval2</span>
+        <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;pval1&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">pval1</span>
+        <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;pval2&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">pval2</span>
+
+        <span class="c1">#read type dependent index data</span>
+        <span class="k">if</span> <span class="n">dictout</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;BDSYMV0_&quot;</span><span class="p">,</span><span class="s2">&quot;BDSYMVN_&quot;</span><span class="p">,</span><span class="s2">&quot;BDFULLV0&quot;</span><span class="p">,</span><span class="s2">&quot;BDFULLVN&quot;</span><span class="p">]:</span>
+            <span class="p">(</span><span class="n">nblocks</span><span class="p">,)</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">endianness</span><span class="o">+</span><span class="s1">&#39;I&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+            <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;nblocks&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">nblocks</span>
+
+        <span class="k">if</span> <span class="n">nread</span> <span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;readme&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">nread</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+        <span class="n">names</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">vals</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">if</span> <span class="n">nints</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">inames</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;|S24&#39;</span><span class="p">,</span><span class="n">count</span><span class="o">=</span><span class="n">nints</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;|U24&#39;</span><span class="p">)</span>
+            <span class="n">names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">inames</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">vnum</span> <span class="o">&lt;=</span> <span class="mf">2.4</span><span class="p">:</span>
+                <span class="n">ivals</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">endianness</span><span class="o">+</span><span class="s1">&#39;I&#39;</span><span class="p">,</span><span class="n">count</span><span class="o">=</span><span class="n">nints</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ivals</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">endianness</span><span class="o">+</span><span class="s1">&#39;L&#39;</span><span class="p">,</span><span class="n">count</span><span class="o">=</span><span class="n">nints</span><span class="p">)</span>
+            <span class="n">vals</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ivals</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ndbls</span> <span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">dnames</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;|S24&#39;</span><span class="p">,</span><span class="n">count</span><span class="o">=</span><span class="n">ndbls</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;|U24&#39;</span><span class="p">)</span>
+            <span class="n">names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">dnames</span><span class="p">))</span>
+            <span class="n">dvals</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">endianness</span><span class="o">+</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="n">count</span><span class="o">=</span><span class="n">ndbls</span><span class="p">)</span>
+            <span class="n">vals</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">dvals</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;meta&quot;</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="n">ky</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span><span class="n">val</span> <span class="k">for</span> <span class="n">ky</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span><span class="n">vals</span><span class="p">)}</span>
+
+        <span class="c1">#read side description data</span>
+        <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;side1_d&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;|S24&#39;</span><span class="p">,</span><span class="n">count</span><span class="o">=</span><span class="n">nval1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;|U24&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;BDSYMV0_&#39;</span><span class="p">,</span><span class="s1">&#39;BDFULLV0&#39;</span><span class="p">,</span><span class="s1">&#39;BDSYMVN_&#39;</span><span class="p">,</span><span class="s1">&#39;BDFULLVN&#39;</span><span class="p">]:</span>
+            <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;blockind&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">endianness</span><span class="o">+</span><span class="s1">&#39;I&#39;</span><span class="p">,</span><span class="n">count</span><span class="o">=</span><span class="n">nblocks</span><span class="p">)</span>
+            <span class="c1">#also add coordinates in the full matrix</span>
+            <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">getBDcoords</span><span class="p">(</span><span class="n">dictout</span><span class="p">)</span>
+
+
+        <span class="c1">#possibly read second side description</span>
+        <span class="k">if</span> <span class="n">dictout</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;BDFULLV0&#39;</span><span class="p">,</span><span class="s1">&#39;BDFULLVN&#39;</span><span class="p">,</span><span class="s1">&#39;FULLSQV0&#39;</span><span class="p">,</span><span class="s1">&#39;FULLSQVN&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">vnum</span> <span class="o">&lt;=</span> <span class="mf">2.2</span><span class="p">:</span>
+                <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;side2_d&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;side1_d&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;side2_d&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;|S24&#39;</span><span class="p">,</span><span class="n">count</span><span class="o">=</span><span class="n">nval1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;|U24&#39;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;FULL2DVN&quot;</span><span class="p">:</span>
+            <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;side2_d&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;|S24&#39;</span><span class="p">,</span><span class="n">count</span><span class="o">=</span><span class="n">nval2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;|U24&#39;</span><span class="p">)</span>
+
+
+        <span class="c1"># read vectors</span>
+        <span class="k">if</span> <span class="n">nvec</span> <span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;vec&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">endianness</span><span class="o">+</span><span class="s2">&quot;d&quot;</span><span class="p">,</span><span class="n">count</span><span class="o">=</span><span class="n">nvec</span><span class="o">*</span><span class="n">nval1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nval1</span><span class="p">,</span><span class="n">nvec</span><span class="p">),</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+
+        <span class="c1"># read packed matrix</span>
+        <span class="n">pack</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">endianness</span><span class="o">+</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="n">count</span><span class="o">=</span><span class="n">pval1</span><span class="o">*</span><span class="n">pval2</span><span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">unpack</span><span class="p">:</span>
+        <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;pack&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">pack</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">dictout</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;BDSYMV0_&#39;</span><span class="p">,</span><span class="s1">&#39;BDFULLV0&#39;</span><span class="p">,</span><span class="s1">&#39;BDSYMVN_&#39;</span><span class="p">,</span><span class="s1">&#39;BDFULLVN&#39;</span><span class="p">]:</span>
+            <span class="c1">#unpack in sparse matrix</span>
+            <span class="n">dictout</span><span class="p">[</span><span class="s1">&#39;mat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">COO</span><span class="p">(</span><span class="n">dictout</span><span class="p">[</span><span class="s1">&#39;coords&#39;</span><span class="p">],</span> <span class="n">pack</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">dictout</span><span class="p">[</span><span class="s1">&#39;nval1&#39;</span><span class="p">],</span> <span class="n">dictout</span><span class="p">[</span><span class="s1">&#39;nval1&#39;</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unpacking of this type not yet supported&quot;</span><span class="p">)</span>
+
+
+
+
+
+
+    <span class="k">return</span> <span class="n">dictout</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Roelof Rietbroek.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

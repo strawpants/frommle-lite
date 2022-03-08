@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>frommle2.core.usersettings &mdash; frommle2 alpha1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> frommle2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">Reference Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">frommle2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>frommle2.core.usersettings</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for frommle2.core.usersettings</h1><div class="highlight"><pre>
+<span></span><span class="c1"># This file is part of Frommle2</span>
+<span class="c1"># Frommle is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 3 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># Frommle is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with Frommle; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA</span>
+
+<span class="c1"># Author Roelof Rietbroek (roelof@wobbly.earth), 2021</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">keyring</span>
+<span class="kn">from</span> <span class="nn">frommle2.core.logger</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">import</span> <span class="nn">getpass</span>
+
+<div class="viewcode-block" id="UserConfig"><a class="viewcode-back" href="../../../reference/frommle2.core.html#frommle2.core.usersettings.UserConfig">[docs]</a><span class="k">class</span> <span class="nc">UserConfig</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">confFile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">confFile</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">confFile</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">),</span><span class="s1">&#39;.frommle2.yaml&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">confFile</span><span class="o">=</span><span class="n">confFile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    
+<div class="viewcode-block" id="UserConfig.setDefault"><a class="viewcode-back" href="../../../reference/frommle2.core.html#frommle2.core.usersettings.UserConfig.setDefault">[docs]</a>    <span class="k">def</span> <span class="nf">setDefault</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;USER&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;User&quot;</span><span class="p">:</span><span class="n">user</span><span class="p">,</span><span class="s2">&quot;Contact&quot;</span><span class="p">:</span><span class="n">user</span><span class="o">+</span><span class="s2">&quot;@unknown&quot;</span><span class="p">,</span><span class="s2">&quot;Defaultdb&quot;</span><span class="p">:</span><span class="s2">&quot;geoslurp&quot;</span><span class="p">,</span><span class="s2">&quot;Authstore&quot;</span><span class="p">:</span><span class="s2">&quot;keyring&quot;</span><span class="p">,</span><span class="s2">&quot;geoslurp&quot;</span><span class="p">:{</span><span class="s2">&quot;host&quot;</span><span class="p">:</span><span class="s2">&quot;hostname&quot;</span><span class="p">,</span><span class="s2">&quot;port&quot;</span><span class="p">:</span><span class="mi">5432</span><span class="p">,</span><span class="s2">&quot;user&quot;</span><span class="p">:</span><span class="n">user</span><span class="p">,</span><span class="s2">&quot;dbname&quot;</span><span class="p">:</span><span class="s2">&quot;geoslurp&quot;</span><span class="p">}}</span></div>
+
+<div class="viewcode-block" id="UserConfig.write"><a class="viewcode-back" href="../../../reference/frommle2.core.html#frommle2.core.usersettings.UserConfig.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;lastupdate&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">confFile</span><span class="p">,</span><span class="s1">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="UserConfig.read"><a class="viewcode-back" href="../../../reference/frommle2.core.html#frommle2.core.usersettings.UserConfig.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">#read last used settings</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">confFile</span><span class="p">):</span>
+            <span class="c1">#Read parameters from yaml file</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">confFile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#set defaults </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setDefault</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">=</span><span class="n">value</span>
+
+<div class="viewcode-block" id="UserConfig.setAuth"><a class="viewcode-back" href="../../../reference/frommle2.core.html#frommle2.core.usersettings.UserConfig.setAuth">[docs]</a>    <span class="k">def</span> <span class="nf">setAuth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">secret</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;Authstore&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;keyring&quot;</span><span class="p">:</span>
+            <span class="n">keyring</span><span class="o">.</span><span class="n">set_password</span><span class="p">(</span><span class="s2">&quot;frommle&quot;</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">secret</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Note passwords will be stored unencrypted, consider using Authstore=&#39;keyring&#39;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;Auth&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;Auth&quot;</span><span class="p">]</span><span class="o">=</span><span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;Auth&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="n">secret</span><span class="p">]</span></div>
+    
+<div class="viewcode-block" id="UserConfig.getAuth"><a class="viewcode-back" href="../../../reference/frommle2.core.html#frommle2.core.usersettings.UserConfig.getAuth">[docs]</a>    <span class="k">def</span> <span class="nf">getAuth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">secret</span><span class="o">=</span><span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;Authstore&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;keyring&quot;</span><span class="p">:</span>
+            <span class="n">secret</span><span class="o">=</span><span class="n">keyring</span><span class="o">.</span><span class="n">get_password</span><span class="p">(</span><span class="s2">&quot;frommle&quot;</span><span class="p">,</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s2">&quot;Auth&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;Auth&quot;</span><span class="p">]:</span>
+                <span class="n">secret</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;Auth&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+            
+        <span class="k">if</span> <span class="n">secret</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">message</span><span class="p">:</span>
+                <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Please enter secret/password for alias </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">key</span>
+            <span class="n">secret</span><span class="o">=</span><span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setAuth</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">secret</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">secret</span></div>
+
+<div class="viewcode-block" id="UserConfig.dbUri"><a class="viewcode-back" href="../../../reference/frommle2.core.html#frommle2.core.usersettings.UserConfig.dbUri">[docs]</a>    <span class="k">def</span> <span class="nf">dbUri</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">alias</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">alias</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">alias</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;Defaultdb&quot;</span><span class="p">]</span>
+        <span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="n">alias</span><span class="p">][</span><span class="s2">&quot;user&quot;</span><span class="p">]</span>
+        <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="n">alias</span><span class="p">][</span><span class="s2">&quot;host&quot;</span><span class="p">]</span>
+        <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="n">alias</span><span class="p">][</span><span class="s2">&quot;port&quot;</span><span class="p">]</span>
+        <span class="n">dbname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="n">alias</span><span class="p">][</span><span class="s2">&quot;dbname&quot;</span><span class="p">]</span>
+        <span class="n">secret</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getAuth</span><span class="p">(</span><span class="n">alias</span><span class="p">,</span><span class="s2">&quot;Please enter password for user </span><span class="si">%s</span><span class="s2"> at database </span><span class="si">%s</span><span class="s2"> on host </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">user</span><span class="p">,</span><span class="n">dbname</span><span class="p">,</span><span class="n">host</span><span class="p">))</span>
+            
+        <span class="k">return</span>  <span class="s2">&quot;postgresql+psycopg2://&quot;</span><span class="o">+</span><span class="n">user</span><span class="o">+</span><span class="s2">&quot;:&quot;</span><span class="o">+</span><span class="n">secret</span><span class="o">+</span><span class="s2">&quot;@&quot;</span><span class="o">+</span><span class="n">host</span><span class="o">+</span><span class="s2">&quot;:&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="n">dbname</span></div></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Roelof Rietbroek.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>frommle2.core package &mdash; frommle2 alpha1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="frommle2.gnssr package" href="frommle2.gnssr.html" />
+    <link rel="prev" title="frommle2 package" href="frommle2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> frommle2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference.html">Reference Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">frommle2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../reference.html">Reference Documentation</a> &raquo;</li>
+          <li><a href="frommle2.html">frommle2 package</a> &raquo;</li>
+      <li>frommle2.core package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/reference/frommle2.core.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-frommle2.core">
+<span id="frommle2-core-package"></span><h1>frommle2.core package<a class="headerlink" href="#module-frommle2.core" title="Permalink to this headline"></a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</div>
+<div class="section" id="module-frommle2.core.guide">
+<span id="frommle2-core-guide-module"></span><h2>frommle2.core.guide module<a class="headerlink" href="#module-frommle2.core.guide" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="frommle2.core.guide.FrGuide">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">frommle2.core.guide.</span></span><span class="sig-name descname"><span class="pre">FrGuide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sortorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify_integrity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/guide.html#FrGuide"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.guide.FrGuide" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.core.indexes.multi.MultiIndex</span></code></p>
+<p>Base class which will be used for frommle specific guides, it inherits from pandas MultiIndex
+so it can be used as a substitute with additional functionality</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-frommle2.core.linear_sparse_fwd">
+<span id="frommle2-core-linear-sparse-fwd-module"></span><h2>frommle2.core.linear_sparse_fwd module<a class="headerlink" href="#module-frommle2.core.linear_sparse_fwd" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="frommle2.core.linear_sparse_fwd.LinearSparseFwd">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">frommle2.core.linear_sparse_fwd.</span></span><span class="sig-name descname"><span class="pre">LinearSparseFwd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dasparse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">xarray.core.dataarray.DataArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/linear_sparse_fwd.html#LinearSparseFwd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.linear_sparse_fwd.LinearSparseFwd" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#frommle2.core.xforward.BaseFwd" title="frommle2.core.xforward.BaseFwd"><code class="xref py py-class docutils literal notranslate"><span class="pre">frommle2.core.xforward.BaseFwd</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="frommle2.core.linear_sparse_fwd.LinearSparseFwd.dot">
+<span class="sig-name descname"><span class="pre">dot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">otherfwd</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/linear_sparse_fwd.html#LinearSparseFwd.dot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.linear_sparse_fwd.LinearSparseFwd.dot" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="frommle2.core.linear_sparse_fwd.LinearSparseFwd.einsumReplace">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">einsumReplace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subscripts</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">operands</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'K'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">casting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'safe'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/linear_sparse_fwd.html#LinearSparseFwd.einsumReplace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.linear_sparse_fwd.LinearSparseFwd.einsumReplace" title="Permalink to this definition"></a></dt>
+<dd><p>Mimics the interface of <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.einsum.html">https://numpy.org/doc/stable/reference/generated/numpy.einsum.html</a>, but uses the sparse.COO dot function</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="frommle2.core.linear_sparse_fwd.LinearSparseFwd.isLinear">
+<span class="sig-name descname"><span class="pre">isLinear</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#frommle2.core.linear_sparse_fwd.LinearSparseFwd.isLinear" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-frommle2.core.logger">
+<span id="frommle2-core-logger-module"></span><h2>frommle2.core.logger module<a class="headerlink" href="#module-frommle2.core.logger" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="frommle2.core.logger.debugging">
+<span class="sig-prename descclassname"><span class="pre">frommle2.core.logger.</span></span><span class="sig-name descname"><span class="pre">debugging</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/logger.html#debugging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.logger.debugging" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="frommle2.core.logger.setDebugLevel">
+<span class="sig-prename descclassname"><span class="pre">frommle2.core.logger.</span></span><span class="sig-name descname"><span class="pre">setDebugLevel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/logger.html#setDebugLevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.logger.setDebugLevel" title="Permalink to this definition"></a></dt>
+<dd><p>Set logging level for both python and c++ to DEBUG severity</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="frommle2.core.logger.setErrorLevel">
+<span class="sig-prename descclassname"><span class="pre">frommle2.core.logger.</span></span><span class="sig-name descname"><span class="pre">setErrorLevel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/logger.html#setErrorLevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.logger.setErrorLevel" title="Permalink to this definition"></a></dt>
+<dd><p>Set logging level for both python and c++ to WARNING severity</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="frommle2.core.logger.setInfoLevel">
+<span class="sig-prename descclassname"><span class="pre">frommle2.core.logger.</span></span><span class="sig-name descname"><span class="pre">setInfoLevel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/logger.html#setInfoLevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.logger.setInfoLevel" title="Permalink to this definition"></a></dt>
+<dd><p>Set logging level for both python and c++ to INFO severity</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="frommle2.core.logger.setWarningLevel">
+<span class="sig-prename descclassname"><span class="pre">frommle2.core.logger.</span></span><span class="sig-name descname"><span class="pre">setWarningLevel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/logger.html#setWarningLevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.logger.setWarningLevel" title="Permalink to this definition"></a></dt>
+<dd><p>Set logging level for both python and c++ to WARNING severity</p>
+</dd></dl>
+
+</div>
+<div class="section" id="frommle2-core-polynomial-module">
+<h2>frommle2.core.polynomial module<a class="headerlink" href="#frommle2-core-polynomial-module" title="Permalink to this headline"></a></h2>
+</div>
+<div class="section" id="module-frommle2.core.time">
+<span id="frommle2-core-time-module"></span><h2>frommle2.core.time module<a class="headerlink" href="#module-frommle2.core.time" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="frommle2.core.time.decyear2dt">
+<span class="sig-prename descclassname"><span class="pre">frommle2.core.time.</span></span><span class="sig-name descname"><span class="pre">decyear2dt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decyear</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/time.html#decyear2dt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.time.decyear2dt" title="Permalink to this definition"></a></dt>
+<dd><p>Convert a decimal year to a datetime object</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-frommle2.core.usersettings">
+<span id="frommle2-core-usersettings-module"></span><h2>frommle2.core.usersettings module<a class="headerlink" href="#module-frommle2.core.usersettings" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="frommle2.core.usersettings.UserConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">frommle2.core.usersettings.</span></span><span class="sig-name descname"><span class="pre">UserConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">confFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/usersettings.html#UserConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.usersettings.UserConfig" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="frommle2.core.usersettings.UserConfig.dbUri">
+<span class="sig-name descname"><span class="pre">dbUri</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/usersettings.html#UserConfig.dbUri"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.usersettings.UserConfig.dbUri" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="frommle2.core.usersettings.UserConfig.getAuth">
+<span class="sig-name descname"><span class="pre">getAuth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/usersettings.html#UserConfig.getAuth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.usersettings.UserConfig.getAuth" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="frommle2.core.usersettings.UserConfig.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/usersettings.html#UserConfig.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.usersettings.UserConfig.read" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="frommle2.core.usersettings.UserConfig.setAuth">
+<span class="sig-name descname"><span class="pre">setAuth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secret</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/usersettings.html#UserConfig.setAuth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.usersettings.UserConfig.setAuth" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="frommle2.core.usersettings.UserConfig.setDefault">
+<span class="sig-name descname"><span class="pre">setDefault</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/usersettings.html#UserConfig.setDefault"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.usersettings.UserConfig.setDefault" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="frommle2.core.usersettings.UserConfig.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/usersettings.html#UserConfig.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.usersettings.UserConfig.write" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-frommle2.core.xforward">
+<span id="frommle2-core-xforward-module"></span><h2>frommle2.core.xforward module<a class="headerlink" href="#module-frommle2.core.xforward" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="frommle2.core.xforward.BaseFwd">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">frommle2.core.xforward.</span></span><span class="sig-name descname"><span class="pre">BaseFwd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incoord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcoord</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/frommle2/core/xforward.html#BaseFwd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#frommle2.core.xforward.BaseFwd" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for a forward operator which uses xarray/pandas style indices/coordinates to refer to the input/output</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="frommle2.html" class="btn btn-neutral float-left" title="frommle2 package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="frommle2.gnssr.html" class="btn btn-neutral float-right" title="frommle2.gnssr package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Roelof Rietbroek.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

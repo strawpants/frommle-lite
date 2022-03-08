@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>frommle2.io.gsmv6 &mdash; frommle2 alpha1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> frommle2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">Reference Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">frommle2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>frommle2.io.gsmv6</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for frommle2.io.gsmv6</h1><div class="highlight"><pre>
+<span></span><span class="c1"># This file is part of frommle2.</span>
+<span class="c1"># frommle2 is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 3 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># frommle2 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with Frommle; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA</span>
+
+<span class="c1"># Author Roelof Rietbroek (r.rietbroek@utwente.nl), 2021</span>
+
+<span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">from</span> <span class="nn">frommle2.sh.xarraysh</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="readGSMv6"><a class="viewcode-back" href="../../../reference/frommle2.io.html#frommle2.io.gsmv6.readGSMv6">[docs]</a><span class="k">def</span> <span class="nf">readGSMv6</span><span class="p">(</span><span class="n">fileobj</span><span class="p">,</span><span class="n">nmaxstop</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">):</span>
+    <span class="n">needsClosing</span><span class="o">=</span><span class="kc">False</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">fileobj</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">needsClosing</span><span class="o">=</span><span class="kc">True</span>
+        <span class="k">if</span> <span class="n">fileobj</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.gz&#39;</span><span class="p">):</span>
+            <span class="n">fileobj</span><span class="o">=</span><span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fileobj</span><span class="p">,</span><span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fileobj</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">fileobj</span><span class="p">,</span><span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+
+    <span class="c1">#first read the yaml header </span>
+    <span class="n">buf</span><span class="o">=</span><span class="n">BytesIO</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">ln</span> <span class="ow">in</span> <span class="n">fileobj</span><span class="p">:</span>
+        <span class="k">if</span> <span class="sa">b</span><span class="s1">&#39;# End of YAML header&#39;</span> <span class="ow">in</span> <span class="n">ln</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">buf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ln</span><span class="p">)</span>
+    <span class="n">hdr</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())[</span><span class="s2">&quot;header&quot;</span><span class="p">]</span>
+    
+    <span class="c1">#setup global attributes</span>
+    <span class="n">attr</span><span class="o">=</span><span class="p">{}</span>
+    <span class="n">attr</span><span class="p">[</span><span class="s2">&quot;nmaxfile&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;dimensions&quot;</span><span class="p">][</span><span class="s2">&quot;degree&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;nmax&quot;</span> <span class="ow">in</span> <span class="n">attr</span><span class="p">:</span>
+        <span class="n">attr</span><span class="p">[</span><span class="s2">&quot;nmax&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">attr</span><span class="p">[</span><span class="s2">&quot;nmaxfile&quot;</span><span class="p">]</span>
+
+    <span class="n">attr</span><span class="p">[</span><span class="s2">&quot;tstart&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">][</span><span class="s2">&quot;time_coverage_start&quot;</span><span class="p">]</span>
+    <span class="n">attr</span><span class="p">[</span><span class="s2">&quot;tend&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">][</span><span class="s2">&quot;time_coverage_end&quot;</span><span class="p">]</span>
+
+    <span class="n">nonstand</span><span class="o">=</span><span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;non-standard_attributes&quot;</span><span class="p">]</span>
+
+    <span class="n">attr</span><span class="p">[</span><span class="s2">&quot;gm&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">nonstand</span><span class="p">[</span><span class="s2">&quot;earth_gravity_param&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+    <span class="n">attr</span><span class="p">[</span><span class="s2">&quot;re&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">nonstand</span><span class="p">[</span><span class="s2">&quot;mean_equator_radius&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+    
+
+    <span class="n">nmax</span><span class="o">=</span><span class="n">attr</span><span class="p">[</span><span class="s2">&quot;nmax&quot;</span><span class="p">]</span>
+
+    <span class="n">nsh</span><span class="o">=</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="o">.</span><span class="n">sh</span><span class="o">.</span><span class="n">nsh</span><span class="p">(</span><span class="n">nmax</span><span class="p">,</span><span class="n">squeeze</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="n">cnm</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">nsh</span><span class="p">])</span>
+    <span class="n">sigcnm</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">nsh</span><span class="p">])</span>
+    <span class="n">ncount</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">nmt</span><span class="o">=</span><span class="p">[]</span>
+    <span class="c1">#continue reading the data</span>
+    <span class="n">dataregex</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;^GRCOF2&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ln</span> <span class="ow">in</span> <span class="n">fileobj</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dataregex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">ln</span><span class="p">):</span>
+            <span class="n">lnspl</span><span class="o">=</span><span class="n">ln</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">n</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">lnspl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">n</span><span class="o">&gt;</span> <span class="n">nmaxstop</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ncount</span> <span class="o">&gt;</span> <span class="n">nsh</span><span class="p">:</span>
+                    <span class="c1">#all required coefficients have been read (no need to read the file further)</span>
+                    <span class="k">break</span>
+                <span class="k">continue</span>
+                
+
+            <span class="n">m</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">lnspl</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+            <span class="n">cnm</span><span class="p">[</span><span class="n">ncount</span><span class="p">]</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">lnspl</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">sigcnm</span><span class="p">[</span><span class="n">ncount</span><span class="p">]</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">lnspl</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+            <span class="n">nmt</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">trig</span><span class="o">.</span><span class="n">c</span><span class="p">))</span>
+            <span class="n">ncount</span><span class="o">+=</span><span class="mi">1</span>
+            
+            <span class="c1">#possibly also add snm coefficients</span>
+            <span class="k">if</span> <span class="n">m</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">cnm</span><span class="p">[</span><span class="n">ncount</span><span class="p">]</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">lnspl</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+                <span class="n">sigcnm</span><span class="p">[</span><span class="n">ncount</span><span class="p">]</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">lnspl</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+                <span class="n">nmt</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">trig</span><span class="o">.</span><span class="n">s</span><span class="p">))</span>
+                <span class="n">ncount</span><span class="o">+=</span><span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">needsClosing</span><span class="p">:</span>
+        <span class="n">fileobj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    
+    <span class="n">ds</span><span class="o">=</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data_vars</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">cnm</span><span class="o">=</span><span class="p">([</span><span class="s2">&quot;shg&quot;</span><span class="p">],</span><span class="n">cnm</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">ncount</span><span class="p">]),</span><span class="n">sigcnm</span><span class="o">=</span><span class="p">([</span><span class="s2">&quot;shg&quot;</span><span class="p">],</span><span class="n">sigcnm</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">ncount</span><span class="p">])),</span><span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;shg&quot;</span><span class="p">:</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="o">.</span><span class="n">sh</span><span class="o">.</span><span class="n">mi_fromtuples</span><span class="p">(</span><span class="n">nmt</span><span class="p">)},</span><span class="n">attrs</span><span class="o">=</span><span class="n">attr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ds</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Roelof Rietbroek.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

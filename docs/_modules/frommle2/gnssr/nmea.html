@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>frommle2.gnssr.nmea &mdash; frommle2 alpha1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> frommle2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">Reference Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">frommle2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>frommle2.gnssr.nmea</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for frommle2.gnssr.nmea</h1><div class="highlight"><pre>
+<span></span><span class="c1"># This file is part of frommle2.</span>
+<span class="c1"># frommle2 is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 3 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># frommle2 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with Frommle; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA</span>
+
+<span class="c1"># Author Roelof Rietbroek (r.rietbroek@utwente.nl), 2021</span>
+<span class="kn">import</span> <span class="nn">gzip</span> <span class="k">as</span> <span class="nn">gz</span>
+<span class="kn">from</span> <span class="nn">frommle2.core.logger</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span><span class="n">timedelta</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+
+<span class="n">cconv</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">100</span><span class="o">/</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">swopfac</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;E&quot;</span><span class="p">:</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;W&quot;</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;N&quot;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;S&quot;</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span>
+<div class="viewcode-block" id="parseDeg"><a class="viewcode-back" href="../../../reference/frommle2.gnssr.html#frommle2.gnssr.nmea.parseDeg">[docs]</a><span class="k">def</span> <span class="nf">parseDeg</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">EWNS</span><span class="p">):</span>
+    <span class="n">decdeg</span><span class="o">=</span><span class="n">deg</span><span class="o">/</span><span class="mi">60</span><span class="o">+</span><span class="n">cconv</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">deg</span><span class="o">/</span><span class="mi">100</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">swopfac</span><span class="p">[</span><span class="n">EWNS</span><span class="p">]</span><span class="o">*</span><span class="n">decdeg</span></div>
+
+<div class="viewcode-block" id="smoothDegrees"><a class="viewcode-back" href="../../../reference/frommle2.gnssr.html#frommle2.gnssr.nmea.smoothDegrees">[docs]</a><span class="k">def</span> <span class="nf">smoothDegrees</span><span class="p">(</span><span class="n">degarray</span><span class="p">,</span><span class="n">timev</span><span class="p">,</span><span class="n">irec</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Smooths degree array whcih only have degree resolution to a version which varies more smoothly (i.e. no jumps)&quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">degarray</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1">#Corner case just return original value</span>
+            <span class="k">return</span> <span class="n">degarray</span>
+
+
+        <span class="n">ddif</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">degarray</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">ddif</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1">#no need to interpolate in this case as all values are the same</span>
+            <span class="k">return</span> <span class="n">degarray</span>
+
+        
+        <span class="k">if</span> <span class="n">irec</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span><span class="s2">&quot;This function is not supposed to be called with a recursion depth more than 1)&quot;</span><span class="p">)</span>
+            <span class="c1">#Possibly split into contigous sections (i.e. crossing  0-360 border or jumping in time)</span>
+        <span class="n">dsections</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ddif</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">180.0</span><span class="p">),</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">timev</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span><span class="s1">&#39;s&#39;</span><span class="p">))))</span>  
+        <span class="k">if</span> <span class="n">dsections</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">degsmth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">degarray</span><span class="p">)],</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ist</span><span class="p">,</span><span class="n">iend</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">dsections</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dsections</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">degarray</span><span class="p">))):</span>
+                <span class="c1">#call this function for the sections (it shouldn;t execute this if part)</span>
+                <span class="c1"># import pdb;pdb.set_trace()</span>
+                <span class="n">degsmth</span><span class="p">[</span><span class="n">ist</span><span class="p">:</span><span class="n">iend</span><span class="p">]</span><span class="o">=</span><span class="n">smoothDegrees</span><span class="p">(</span><span class="n">degarray</span><span class="p">[</span><span class="n">ist</span><span class="p">:</span><span class="n">iend</span><span class="p">],</span><span class="n">timev</span><span class="p">[</span><span class="n">ist</span><span class="p">:</span><span class="n">iend</span><span class="p">],</span><span class="n">irec</span><span class="o">=</span><span class="n">irec</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            
+            <span class="c1">#compute for the contiguous section</span>
+            <span class="c1">#detect the jumps (and add the first and final index) value</span>
+            <span class="n">ijumps</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">ddif</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">degarray</span><span class="p">)),</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="c1">#what are half the interval lengths between the jump locations (we need to shift the interpolant input by this)</span>
+            <span class="n">iintHalfDistance</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ijumps</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+            <span class="c1">#create the support points for the interpolant</span>
+            <span class="n">isup</span><span class="o">=</span><span class="n">ijumps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">iintHalfDistance</span>
+            <span class="n">degsup</span><span class="o">=</span><span class="n">degarray</span><span class="p">[</span><span class="n">ijumps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">inonnan</span><span class="o">=~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">degarray</span><span class="p">[</span><span class="n">ijumps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+            <span class="c1"># import pdb;pdb.set_trace()</span>
+            <span class="c1">#create an interpolant based on the values where a jump was detected</span>
+            <span class="n">iinterp</span><span class="o">=</span><span class="n">interp1d</span><span class="p">(</span><span class="n">isup</span><span class="p">[</span><span class="n">inonnan</span><span class="p">],</span><span class="n">degsup</span><span class="p">[</span><span class="n">inonnan</span><span class="p">],</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span><span class="n">fill_value</span><span class="o">=</span><span class="s2">&quot;extrapolate&quot;</span><span class="p">)</span>
+            <span class="n">degsmth</span><span class="o">=</span><span class="n">iinterp</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">degarray</span><span class="p">))])</span>
+            
+
+            <span class="n">degsmth</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">degsmth</span><span class="p">)]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="c1">#refill original nan values with nans again</span>
+        
+        <span class="c1"># import pdb;pdb.set_trace()</span>
+        <span class="k">return</span> <span class="n">degsmth</span></div>
+
+<div class="viewcode-block" id="parseGPRMC"><a class="viewcode-back" href="../../../reference/frommle2.gnssr.html#frommle2.gnssr.nmea.parseGPRMC">[docs]</a><span class="k">def</span> <span class="nf">parseGPRMC</span><span class="p">(</span><span class="n">ln</span><span class="p">):</span>
+    
+    <span class="n">spl</span><span class="o">=</span><span class="n">ln</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">spl</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;V&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="n">hr</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">spl</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">mn</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">spl</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+    <span class="n">sec</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">spl</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">4</span><span class="p">:])</span>
+    <span class="n">date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">spl</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">%m%y&quot;</span><span class="p">)</span>
+    <span class="n">dt</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span><span class="n">date</span><span class="o">+</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">hr</span><span class="p">,</span><span class="n">minutes</span><span class="o">=</span><span class="n">mn</span><span class="p">,</span><span class="n">seconds</span><span class="o">=</span><span class="n">sec</span><span class="p">)}</span>
+    <span class="c1">#parse weird DDDMM.MMMMM format</span>
+    <span class="n">dt</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">parseDeg</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">spl</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span><span class="n">spl</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+    <span class="n">dt</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">parseDeg</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">spl</span><span class="p">[</span><span class="mi">5</span><span class="p">]),</span><span class="n">spl</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">dt</span></div>
+
+<div class="viewcode-block" id="parseGPGSV"><a class="viewcode-back" href="../../../reference/frommle2.gnssr.html#frommle2.gnssr.nmea.parseGPGSV">[docs]</a><span class="k">def</span> <span class="nf">parseGPGSV</span><span class="p">(</span><span class="n">ln</span><span class="p">):</span>
+    <span class="c1">#split line without considering the checksum at the end</span>
+    <span class="n">spl</span><span class="o">=</span><span class="n">ln</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+    <span class="n">dt</span><span class="o">=</span><span class="p">{}</span>
+    <span class="c1">#loop over available satellite prn&#39;s</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">spl</span><span class="p">),</span><span class="mi">4</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">prn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;PRN</span><span class="si">{</span><span class="n">spl</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">elev</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">spl</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">az</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">spl</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">snr</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">spl</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1">#It may be possible that ,,, entries occur, so we&#39;ll just ignore those</span>
+            <span class="k">continue</span>
+
+        <span class="n">dt</span><span class="p">[</span><span class="n">prn</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;elev&quot;</span><span class="p">:</span><span class="n">elev</span><span class="p">,</span><span class="s2">&quot;az&quot;</span><span class="p">:</span><span class="n">az</span><span class="p">,</span><span class="s2">&quot;snr&quot;</span><span class="p">:</span><span class="n">snr</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">dt</span></div>
+
+
+<span class="n">dispatchParse</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;$GPRMC&quot;</span><span class="p">:</span><span class="n">parseGPRMC</span><span class="p">,</span><span class="s2">&quot;$GPGSV&quot;</span><span class="p">:</span><span class="n">parseGPGSV</span><span class="p">}</span>
+
+<div class="viewcode-block" id="readnmea"><a class="viewcode-back" href="../../../reference/frommle2.gnssr.html#frommle2.gnssr.nmea.readnmea">[docs]</a><span class="k">def</span> <span class="nf">readnmea</span><span class="p">(</span><span class="n">fidorfile</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parses a nmea file/stream and puts the output in a pandas dataframe&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">fidorfile</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fidorfile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.gz&#39;</span><span class="p">):</span>
+            <span class="n">fid</span><span class="o">=</span><span class="n">gz</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fidorfile</span><span class="p">,</span><span class="s1">&#39;rt&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">fidorfile</span><span class="p">,</span><span class="s1">&#39;rt&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fid</span><span class="o">=</span><span class="n">fidorfile</span>
+
+
+
+    <span class="c1">#loop over the buffer and parse messages as we go</span>
+    <span class="n">nmeacycle</span><span class="o">=</span><span class="p">{}</span>
+    <span class="n">nmeadata</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ln</span> <span class="ow">in</span> <span class="n">fid</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ln</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">nmeacycle</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dispatchParse</span><span class="p">[</span><span class="n">ln</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">]](</span><span class="n">ln</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">continue</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping unknown NMEA message </span><span class="si">{</span><span class="n">ln</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="n">ln</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="ow">and</span> <span class="nb">bool</span><span class="p">(</span><span class="n">nmeacycle</span><span class="p">):</span>
+            <span class="n">basedict</span><span class="o">=</span><span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">nmeacycle</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;PRN&quot;</span><span class="p">)}</span>
+
+            <span class="c1">#unwrap the different PRN&#39;s into separate rows</span>
+            <span class="k">for</span> <span class="n">ky</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">nmeacycle</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">ky</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;PRN&quot;</span><span class="p">):</span>
+                    <span class="n">nmeadata</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="o">**</span><span class="n">basedict</span><span class="p">,</span><span class="s2">&quot;PRN&quot;</span><span class="p">:</span><span class="nb">int</span><span class="p">(</span><span class="n">ky</span><span class="p">[</span><span class="mi">3</span><span class="p">:]),</span><span class="o">**</span><span class="n">val</span><span class="p">})</span>
+            <span class="n">nmeacycle</span><span class="o">=</span><span class="p">{}</span>
+    <span class="c1">#create a dataframe and set multiindex</span>
+    <span class="n">df</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">nmeadata</span><span class="p">)</span>
+    <span class="c1">#We wan to get rid of rows which don;t have a elevation of azimuth in them</span>
+    <span class="c1"># df.dropna(subset=[&quot;elev&quot;,&quot;az&quot;],inplace=True)</span>
+    
+
+    <span class="c1">#since the resolution of the elevatio, and azimuthn is only on discrete degrees, let&#39;s create smoothed versions (better for plotting etc)</span>
+    <span class="c1"># Furthermore, we also want to identify the different ascending/descending segment, even/oddly numbered repspectively so we can select of those too</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;elevsmth&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span> 
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;azsmth&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span> 
+     
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;segment&quot;</span><span class="p">]</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">grp</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;PRN&quot;</span><span class="p">):</span>
+        <span class="n">time</span><span class="o">=</span><span class="n">grp</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">dvi</span><span class="p">,</span><span class="n">dvo</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">&quot;elev&quot;</span><span class="p">,</span><span class="s2">&quot;elevsmth&quot;</span><span class="p">),(</span><span class="s2">&quot;az&quot;</span><span class="p">,</span><span class="s2">&quot;azsmth&quot;</span><span class="p">)]:</span>
+            <span class="n">dsmooth</span><span class="o">=</span><span class="n">smoothDegrees</span><span class="p">(</span><span class="n">grp</span><span class="p">[</span><span class="n">dvi</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span><span class="n">time</span><span class="p">)</span>
+            <span class="c1">#put the stuff back in the dataframe</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">grp</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">dvo</span><span class="p">]</span><span class="o">=</span><span class="n">dsmooth</span>
+
+
+            <span class="k">if</span> <span class="n">dvi</span> <span class="o">==</span> <span class="s2">&quot;elev&quot;</span><span class="p">:</span>
+                <span class="c1">#also figure out the valid iascending (will be even numbered, descending will be oddly numbered) segments per PRN</span>
+                <span class="n">pdif</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dsmooth</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                
+                <span class="n">segment</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">pdif</span><span class="p">))),</span><span class="mi">0</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">pdif</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                    <span class="c1">#starts with a descending node</span>
+                    <span class="c1">#make sure it&#39;s oddly numbered</span>
+                    <span class="n">segment</span><span class="o">=</span><span class="n">segment</span><span class="o">+</span><span class="mi">1</span>
+
+                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">grp</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="s2">&quot;segment&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">segment</span>
+
+
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s2">&quot;time&quot;</span><span class="p">,</span><span class="s2">&quot;PRN&quot;</span><span class="p">,</span><span class="s2">&quot;segment&quot;</span><span class="p">])</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Roelof Rietbroek.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
