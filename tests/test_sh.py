@@ -14,13 +14,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 # Author Roelof Rietbroek (r.rietbroek@utwente.nl), 2022
-# from frommle2.sh.analysis import Analysis
+from frommle2.sh.analysis import Analysis
 from frommle2.sh.isoload import unit as shunit
 from frommle2.io.shascii import readSHAscii
 from io import StringIO
-# import xarray.testing as xrtest
-
+import xarray.testing as xrtest
+import numpy as np
 import unittest
+import logging
 
 # Independent validation data for unit load (lon 0.5,lat=53.0)
 unitvaldata=""" META    5    0.000000    0.000000    0.000000
@@ -48,38 +49,47 @@ unitvaldata=""" META    5    0.000000    0.000000    0.000000
      """
 
 class TestSH(unittest.TestCase):
-    # logger = logging.getLogger("TestSH")
-    # logging.basicConfig(format = '%(asctime)s %(funcName)s %(levelname)s: %(message)s', 
-            # datefmt="%Y-%m-%d %H:%M:%S",level = logging.INFO)
+    logger = logging.getLogger("TestSH")
+    logging.basicConfig(format = '%(asctime)s %(funcName)s %(levelname)s: %(message)s', 
+            datefmt="%Y-%m-%d %H:%M:%S",level = logging.INFO)
     def test_ynm(self):
-        print("Testing real 4pi normalized spherical harmonics Ynm")
+        self.logger.info("Testing real 4pi normalized spherical harmonics Ynm")
         lon=[0.5] 
         lat=[53.0]
         nmax=5
 
         #Note: we need to drop the np dimension in order to have a 1D array for comparison
         daunit=shunit(nmax,lon,lat)
-        # daunit=daunit.squeeze("np",drop=True)
+        daunit=daunit.squeeze("np",drop=True)
         
-        # daunitval=readSHAscii(StringIO(unitvaldata)).cnm
+        daunitval=readSHAscii(StringIO(unitvaldata)).cnm
         unitSHisClose=True
-        # try:
-            # xrtest.assert_allclose(daunit,daunitval)
-        # except AssertionError as e:
-            # unitSHisClose=False
+        try:
+            xrtest.assert_allclose(daunit,daunitval)
+        except AssertionError as e:
+            unitSHisClose=False
           
         self.assertTrue(unitSHisClose)
 
-    # def test_shanalysis(self):
-        # # self.logger.info("Testing Spherical harmonic analysis of a unit load")
-        # nmax=100
-        # lon=[0.5] 
-        # lat=[53.0]
-        # daunit=shunit(nmax,lon,lat)
-        # # shana=Analysis(nmax,lon=np.arange(lon[0]-20.0,lon[0]+20.0,0.5),lat=np.arange(lat[0]-20,lat[0]+20,0.5))
-        
-        # # dagrd=shana(daunit.cnm)
-        # self.assertTrue(True)
+    def test_shanalysis(self):
+        self.logger.info("Testing Spherical harmonic analysis of a unit load")
+        nmax=120
+        lon=[2.0] 
+        lat=[2.0]
+        # Note we need to rename the variables to avoid a conflict with the lon,lat grid coordinates
+        daunit=shunit(nmax,lon,lat).rename({"lon":"lon_unit","lat":"lat_unit"})
+        #rename the lon,lat variables
+        shana=Analysis(nmax,lon=np.arange(lon[0]-20.0,lon[0]+20.0,0.5),lat=np.arange(lat[0]-20,lat[0]+20,0.5))
+        dagrd=shana(daunit)
+        dagrd.to_netcdf('test.nc')
+        #find whether the location of the maximum is correct
+        damax=dagrd.where(dagrd==dagrd.max(),drop=True).squeeze()
+        self.assertEqual(damax.lon.item(),lon[0])
+        self.assertEqual(damax.lat.item(),lat[0])
+
+        # cehck whether the max closely represents (nmax+1)^2
+        self.assertAlmostEqual(damax.out.item(),(nmax+1)**2)
+
 
 if __name__ == '__main__':
     unittest.main()

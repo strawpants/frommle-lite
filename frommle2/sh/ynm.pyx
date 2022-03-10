@@ -44,7 +44,7 @@ cdef class Ynm:
         cdef cython.size_t sz_half=deref(self.legnm_ptr).size()
         #initialize cache
         self.pnmcache=np.zeros([sz_half])
-        self.trigcache=np.zeros([nmax,2])
+        self.trigcache=np.zeros([nmax+1,2])
         self.ynm=np.zeros([2*sz_half])
         self.sz=sz_half*2
         self.nmax=nmax
@@ -58,8 +58,10 @@ cdef class Ynm:
     
     def __len__(self):
         return self.sz
+    def __call__(self,double lon, double lat):
+        return self.icall(lon,lat)
 
-    def __call__(self,double lon,double lat):
+    cdef double[::1] icall(self,double lon,double lat):
         cdef double costheta
         if (lat != self.latprev):
             #(re)compute associated Legendre functions

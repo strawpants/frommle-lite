@@ -15,17 +15,10 @@
 
 # Author Roelof Rietbroek (r.rietbroek@utwente.nl), 2022
 
+cflookup={
+        "longitude":{'units':'degrees_east','standard_name':'longitude','long_name':'longitude'},
+        "latitude":{'units':'degrees_north','standard_name':'latitude','long_name':'latitude'}
+        }
 
-# distutils: language = c++
-import cython
-from frommle2.sh.legendre cimport Legendre_nm
-
-cdef class Ynm:
-    cdef int nmax
-    cdef double[::1] pnmcache
-    cdef double[:,::1] trigcache
-    cdef double[::1] ynm
-    cdef double latprev;
-    cdef cython.size_t sz
-    cdef Legendre_nm[double]*legnm_ptr
-    cdef double[::1] icall(self,double lon,double lat)
+def get_cfatts(standard_name):
+   return cflookup[standard_name] 
