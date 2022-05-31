@@ -50,7 +50,6 @@ def smoothDegrees(degarray,timev,irec=0):
             degsmth=np.full([len(degarray)],np.nan)
             for ist,iend in zip(np.insert(dsections+1,0,0),np.append(dsections+1,len(degarray))):
                 #call this function for the sections (it shouldn;t execute this if part)
-                # import pdb;pdb.set_trace()
                 degsmth[ist:iend]=smoothDegrees(degarray[ist:iend],timev[ist:iend],irec=irec+1)
         else:
             
@@ -64,7 +63,6 @@ def smoothDegrees(degarray,timev,irec=0):
             isup=ijumps[0:-1]+iintHalfDistance
             degsup=degarray[ijumps[0:-1]]
             inonnan=~np.isnan(degarray[ijumps[0:-1]])
-            # import pdb;pdb.set_trace()
             #create an interpolant based on the values where a jump was detected
             iinterp=interp1d(isup[inonnan],degsup[inonnan],kind='linear',fill_value="extrapolate")
             degsmth=iinterp([float(i) for i in range(len(degarray))])
@@ -72,10 +70,9 @@ def smoothDegrees(degarray,timev,irec=0):
 
             degsmth[np.isnan(degsmth)]=np.nan #refill original nan values with nans again
         
-        # import pdb;pdb.set_trace()
         return degsmth
 
-def parseGPRMC(ln):
+def parseGNRMC(ln):
     
     spl=ln.split(",")
     if spl[2] == "V":
@@ -90,10 +87,11 @@ def parseGPRMC(ln):
     dt["lon"]=parseDeg(float(spl[5]),spl[6])
     return dt
 
-def parseGPGSV(ln):
+def parseGNGSV(ln):
     #split line without considering the checksum at the end
     spl=ln[0:-4].split(",")
     dt={}
+    dt["system"]=spl[0][1:3].replace('GL','GLONASS').replace('GP','GPS')
     #loop over available satellite prn's
     for i in range(4,len(spl),4):
         try:
@@ -109,7 +107,7 @@ def parseGPGSV(ln):
     return dt
 
 
-dispatchParse={"$GPRMC":parseGPRMC,"$GPGSV":parseGPGSV}
+dispatchParse={"$GPRMC":parseGNRMC,"$GPGSV":parseGNGSV,"$GNRMC":parseGNRMC,"$GLGSV":parseGNGSV}
 
 def readnmea(fidorfile):
     """Parses a nmea file/stream and puts the output in a pandas dataframe"""
@@ -130,18 +128,22 @@ def readnmea(fidorfile):
         if ln.startswith("$"):
             try:
                 nmeacycle.update(dispatchParse[ln[0:6]](ln))
+
+                #possibly append this cycle data to nmeadata when a time tag is present
+                if "time" in nmeacycle and (sum(k.startswith("PRN") for k in nmeacycle.keys()) > 0):
+
+                    basedict={k:v for k,v in nmeacycle.items() if not k.startswith("PRN")}
+
+                    #unwrap the different PRN's into separate rows
+                    for ky,val in nmeacycle.items():
+                        if ky.startswith("PRN"):
+                            nmeadata.append({**basedict,"PRN":int(ky[3:]),**val})
+                    #reset nmeacycle dict
+                    nmeacycle={}
             except KeyError:
                 continue
                 logger.warning(f"Skipping unknown NMEA message {ln[0:6]}")
 
-        elif (not ln.strip()) and bool(nmeacycle):
-            basedict={k:v for k,v in nmeacycle.items() if not k.startswith("PRN")}
-
-            #unwrap the different PRN's into separate rows
-            for ky,val in nmeacycle.items():
-                if ky.startswith("PRN"):
-                    nmeadata.append({**basedict,"PRN":int(ky[3:]),**val})
-            nmeacycle={}
     #create a dataframe and set multiindex
     df=pd.DataFrame(nmeadata)
     #We wan to get rid of rows which don;t have a elevation of azimuth in them
@@ -152,7 +154,6 @@ def readnmea(fidorfile):
     # Furthermore, we also want to identify the different ascending/descending segment, even/oddly numbered repspectively so we can select of those too
     df["elevsmth"]=np.nan 
     df["azsmth"]=np.nan 
-     
     df["segment"]=-1
     for name,grp in df.groupby("PRN"):
         time=grp.time.to_numpy()
@@ -175,4 +176,4 @@ def readnmea(fidorfile):
                 df.loc[grp.index,"segment"]=segment
 
 
-    return df.set_index(["time","PRN","segment"])
+    return df.set_index(["time","system","PRN","segment"])
