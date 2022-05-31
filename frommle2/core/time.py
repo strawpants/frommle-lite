@@ -25,3 +25,15 @@ def decyear2dt(decyear):
     
     jan1=datetime(year,1,1)
     return jan1+(decyear-year)*(datetime(year+1,1,1)-jan1)
+
+
+def dt2decyear(dt):
+    """Convert a datetime object to a decimal year"""
+    year=dt.year
+
+    jan1=datetime(year,1,1)
+    
+    jan1next=datetime(year+1,1,1)
+    yrlen=(jan1next-jan1).total_seconds()
+    return year+(dt-jan1).total_seconds()/yrlen
+
