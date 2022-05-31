@@ -42,6 +42,7 @@ class SHAccessor:
     def nmin(self):
         """ returns the maximum spherical harmonic degree associated with the shg coordinate"""
         if not self._nmin:
+            self._obj=self.build_MultiIndex()
             self._nmin=self._obj.get_index("shg").unique(level='n').min()      
         return self._nmin
     
@@ -49,9 +50,13 @@ class SHAccessor:
     def nmax(self):
         """ returns the maximum spherical harmonic degree associated with the shg coordinate"""
         if not self._nmax:
+            self._obj=self.build_MultiIndex()
             self._nmax=self._obj.get_index("shg").unique(level='n').max()      
         return self._nmax
-    
+   
+    def truncate(self,nmax=None,nmin=None):
+        return SHAccessor._truncate(self._obj,nmax,nmin)
+
     @staticmethod
     def nsh(nmax,nmin=0,squeeze=False):
         assert nmax>=nmin
@@ -151,7 +156,9 @@ class SHAccessor:
     
     @staticmethod
     def _build_multindex_obj(obj):
-
+        if "shg" in obj.indexes:
+            #already build, so don't bother
+            return obj
         #either build from separate coordinate variables (n,m,t)
         if "n" in obj.coords and "m" in obj.coords and "t" in obj.coords:
             shgmi=pd.MultiIndex.from_tuples([(n,m,trig(t)) for n,m,t in zip(obj.n.values,obj.m.values,obj.t.values)],names=["n","m","t"])
@@ -160,7 +167,18 @@ class SHAccessor:
             #rebuild multiindex from an array of "left-over" tuples
             shgmi=pd.MultiIndex.from_tuples(obj.shg.values,names=["n","m","t"])
             return obj.drop_vars(["shg"]).assign_coords(shg=shgmi)
-
+    
+    @staticmethod
+    def _truncate(obj,nmax,nmin):
+        if nmax is not None:
+            indx=(obj.shg.n <= nmax)
+        if nmin is not None:
+            if indx:
+                indx=indx*(obj.shg.n >= nmin)
+            else:
+                indx=(obj.shg.n >= nmin)
+        
+        return obj.isel(shg=indx) 
 
 @xr.register_dataset_accessor("sh")
 class SHDSAccessor:
@@ -175,11 +193,8 @@ class SHDSAccessor:
         
         pass
 
-
     def truncate(self,nmax=None,nmin=None):
-        """Truncate minimum and /or maximum degree"""
-
-        pass
+        return SHAccessor._truncate(self._obj,nmax,nmin)
 
     @staticmethod
     def nsh(nmax,nmin=0,squeeze=False):
@@ -189,6 +204,7 @@ class SHDSAccessor:
     def nmin(self):
         """ returns the maximum spherical harmonic degree associated with the shg coordinate"""
         if not self._nmin:
+            self._obj=self.build_MultiIndex()
             self._nmin=self._obj.get_index("shg").unique(level='n').min()      
         return self._nmin
     
@@ -196,6 +212,7 @@ class SHDSAccessor:
     def nmax(self):
         """ returns the maximum spherical harmonic degree associated with the shg coordinate"""
         if not self._nmax:
+            self._obj=self.build_MultiIndex()
             self._nmax=self._obj.get_index("shg").unique(level='n').max()      
         return self._nmax
 

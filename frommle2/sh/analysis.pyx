@@ -25,6 +25,7 @@ cimport numpy as np
 from frommle2.sh.ynm cimport Ynm
 import frommle2.sh.xarraysh
 from frommle2.core.cf import get_cfatts
+from warnings import warn
 # Todo: improve speed by directly calling dgemv
 #from scipy.linalg.cython_blas cimport dgemv
 
@@ -52,7 +53,8 @@ cdef class Analysis:
     def __call__(self,xarin):
         """Perform the spherical harmonic analysis""" 
         if xarin.sh.nmax > self.dskel.sh.nmax:
-            raise IndexError("maximum degree of input dataset is smaller than supported")
+            warn(f"maximum degree of input dataset will be cut off to {self.dskel.sh.nmax}")
+            xarin=xarin.sh.truncate(nmax=self.dskel.sh.nmax)
 
         coords={ky:val for ky,val in xarin.coords.items() if ky != "shg"}
         coords.update({ky:val for ky,val in self.dskel.coords.items() if ky != "shg"})

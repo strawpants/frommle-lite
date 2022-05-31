@@ -56,12 +56,13 @@ class LinearSparseFwd(BaseFwd):
     @staticmethod
     def einsumReplace(subscripts, *operands, out=None, dtype=None, order='K', casting='safe', optimize=False):
         """Mimics the interface of https://numpy.org/doc/stable/reference/generated/numpy.einsum.html, but uses the sparse.COO dot function"""
-        
         if subscripts == "ab,cb->ac":
             return operands[0].dot(operands[1].T)
         elif subscripts == "ab,ca->bc":
             return operands[0].T.dot(operands[1].T)
         elif subscripts == "ab,bc->ac":
+            return operands[0].dot(operands[1])
+        elif subscripts == "ab,b->a":
             return operands[0].dot(operands[1])
         else:
             raise NotImplementedError(f"Don't know (yet) how to handle this einsum: {subscripts} with sparse.dot operations")
