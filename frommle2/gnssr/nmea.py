@@ -163,10 +163,9 @@ def readnmea(fidorfile):
             df.loc[grp.index,dvo]=dsmooth
 
 
-            if dvi == "elev":
+            if dvi == "elev" and len(dsmooth) > 2:
                 #also figure out the valid iascending (will be even numbered, descending will be oddly numbered) segments per PRN
                 pdif=(np.diff(dsmooth)>0).astype(float)
-                
                 segment=np.insert(np.cumsum(np.abs(np.diff(pdif))),0,[0,0]).astype(int)
                 if pdif[0] == 0.0:
                     #starts with a descending node
