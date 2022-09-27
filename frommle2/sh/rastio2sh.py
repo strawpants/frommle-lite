@@ -22,7 +22,7 @@ import xarray as xr
 
 import frommle2.sh.xarraysh
 
-def rastio2shDH(rio,nmax=100):
+def rastio2shDH(rio,nmax=100,squeeze=True):
     """Converts an equidistant (sub) grid to spherical harmonic 4-pi normalized coefficients, using the Driscoll Healy approach using shtools"""
 
     if rio.crs.to_epsg() != 4326:
@@ -53,15 +53,15 @@ def rastio2shDH(rio,nmax=100):
 
     gheight=int(180/ddist)
     gwidth=2*gheight
-
     #construct a global numpy grid (extend the grid to 0,360 and -90,90)
     globrast=rio.read(1,window=((-ithPixFrom90N,gheight-ithPixFrom90N),(-ithPixFromLeft,gwidth-ithPixFromLeft)),boundless=True)
     if shft  == -180.0:
         #shift the array to 0 360 (which is what SHExpandDH expects)
         globrast=np.roll(globrast,int(gwidth/2),axis=1)
 
+
     clm=SHExpandDH(globrast,sampling=2,lmax_calc=nmax)
 
-    return xr.DataArray.sh.from_cnm(clm)
+    return xr.DataArray.sh.from_cnm(clm,squeeze=squeeze)
     
 

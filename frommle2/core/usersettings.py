@@ -31,7 +31,7 @@ class UserConfig:
     
     def setDefault(self):
         user=os.environ["USER"]
-        self.settings={"User":user,"Contact":user+"@unknown","Defaultdb":"geoslurp","Authstore":"keyring","geoslurp":{"host":"hostname","port":5432,"user":user,"dbname":"geoslurp"}}
+        self.settings={"User":user,"Contact":user+"@unknown","Institution":"unknown"}
 
     def write(self):
         self.settings["lastupdate"]=datetime.now()
@@ -54,40 +54,8 @@ class UserConfig:
 
     def __setitem__(self,key,value):
         self.settings[key]=value
-
-    def setAuth(self,key,secret):
-        if self.settings["Authstore"] == "keyring":
-            keyring.set_password("frommle",key,secret)
-        else:
-            logger.warning("Note passwords will be stored unencrypted, consider using Authstore='keyring'")
-            if not "Auth" in self.settings:
-                self.settings["Auth"]={}
-            self.settings["Auth"][key][secret]
     
-    def getAuth(self,key,message=None):
-        secret=None
-        if self.settings["Authstore"] == "keyring":
-            secret=keyring.get_password("frommle",key)
-        elif "Auth" in self.settings:
-            if key in self.settings["Auth"]:
-                secret=self.settings["Auth"][key]
-            
-        if secret == None:
-            if not message:
-                message="Please enter secret/password for alias %s"%key
-            secret=getpass.getpass(prompt="%s\n"%(message))
-            self.setAuth(key,secret)
-        
-        return secret
-
-    def dbUri(self,alias=None):
-        if alias == None:
-            alias=self.settings["Defaultdb"]
-        user=self.settings[alias]["user"]
-        host=self.settings[alias]["host"]
-        port=self.settings[alias]["port"]
-        dbname=self.settings[alias]["dbname"]
-        secret=self.getAuth(alias,"Please enter password for user %s at database %s on host %s"%(user,dbname,host))
-            
-        return  "postgresql+psycopg2://"+user+":"+secret+"@"+host+":"+str(port)+"/"+dbname
-
+    def __contains__(self,ky):
+        return ky in self.settings
+    def keys(self):
+        return self.settings.keys()

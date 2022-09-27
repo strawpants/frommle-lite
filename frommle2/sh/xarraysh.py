@@ -105,11 +105,11 @@ class SHAccessor:
 
     
     @staticmethod
-    def from_cnm(cnm):
+    def from_cnm(cnm,squeeze=True):
         """Create a xarray from a cnm array from shtools"""
         nmax=cnm.shape[1]-1
         #create a multiindex
-        shgmi=SHAccessor.nmt_mi(nmax,squeeze=True)
+        shgmi=SHAccessor.nmt_mi(nmax,squeeze=squeeze)
         #indexing vectors so the sh coeffients match the index
         i_n=shgmi.get_level_values(level='n').astype(int)
         i_m=shgmi.get_level_values(level='m').astype(int)
@@ -151,9 +151,14 @@ class SHAccessor:
 
     @staticmethod
     def _flatten_shg_obj(obj):
-        ds=obj.reset_index("shg")
-        return ds.assign_coords(t=(["shg"],[t for t in ds.t.values]))
-    
+        #temporaily not working see https://github.com/Ouranosinc/xscen/pull/67
+        # ds=obj.reset_index("shg")
+        nd=obj.get_index("shg").get_level_values("n")
+        md=obj.get_index("shg").get_level_values("m")
+        td=obj.get_index("shg").get_level_values("t")
+        return obj.assign_coords(n=("shg",nd),m=("shg",md),t=("shg",td)).drop_vars("shg")
+       # return ds.assign_coords(t=(["shg"],[t for t in ds.t.values]))
+     
     @staticmethod
     def _build_multindex_obj(obj):
         if "shg" in obj.indexes:
