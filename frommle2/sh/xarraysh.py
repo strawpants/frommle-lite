@@ -144,6 +144,7 @@ class SHAccessor:
     
     def flatten_shg(self):
         """Serialize n,m,t multindex so it can be written to a file"""
+       
         return SHAccessor._flatten_shg_obj(self._obj)
    
     def build_MultiIndex(self):
@@ -156,7 +157,13 @@ class SHAccessor:
         nd=obj.get_index("shg").get_level_values("n")
         md=obj.get_index("shg").get_level_values("m")
         td=obj.get_index("shg").get_level_values("t")
-        return obj.assign_coords(n=("shg",nd),m=("shg",md),t=("shg",td)).drop_vars("shg")
+        
+        #reset index if n,m,t coordinates are existing already
+        if "n" in obj.coords and "m" in obj.coords and "t" in obj.coords:
+            return obj.reset_index("shg")
+        else:
+            #assign new n,m,t 
+            return obj.assign_coords(n=("shg",nd),m=("shg",md),t=("shg",td)).drop_vars("shg")
        # return ds.assign_coords(t=(["shg"],[t for t in ds.t.values]))
      
     @staticmethod
